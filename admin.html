@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>管理画面</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="login-screen">
+    <h2>ログイン</h2>
+    <input type="text" id="admin-id" placeholder="ID" />
+    <input type="password" id="admin-pass" placeholder="パスワード" />
+    <button onclick="login()">ログイン</button>
+  </div>
+
+  <div id="admin-panel" style="display: none;">
+    <h2>画像アップロード</h2>
+    <input type="file" id="image-upload" accept="image/*" />
+    <button onclick="uploadImage()">アップロード</button>
+    <h3>表示中画像の削除</h3>
+    <button onclick="deleteAll()">すべて削除</button>
+    <ul id="image-list"></ul>
+  </div>
+
+  <script>
+    const ID = "admin";
+    const PASS = "1234";
+
+    function login() {
+      const id = document.getElementById("admin-id").value;
+      const pass = document.getElementById("admin-pass").value;
+      if (id === ID && pass === PASS) {
+        document.getElementById("login-screen").style.display = "none";
+        document.getElementById("admin-panel").style.display = "block";
+        loadImages();
+      } else {
+        alert("IDまたはパスワードが間違っています");
+      }
+    }
+
+    function uploadImage() {
+      const fileInput = document.getElementById("image-upload");
+      const formData = new FormData();
+      formData.append("image", fileInput.files[0]);
+
+      fetch("/upload", {
+        method: "POST",
+        body: formData
+      }).then(() => {
+        alert("アップロード完了！");
+        loadImages();
+      });
+    }
+
+    function deleteAll() {
+      fetch("/delete-all", { method: "DELETE" }).then(() => {
+        alert("全画像を削除しました");
+        loadImages();
+      });
+    }
+
+    function loadImages() {
+      fetch("/images").then(res => res.json()).then(data => {
+        const list = document.getElementById("image-list");
+        list.innerHTML = "";
+        data.forEach(file => {
+          const li = document.createElement("li");
+          li.textContent = file;
+          const del = document.createElement("button");
+          del.textContent = "削除";
+          del.onclick = () => {
+            fetch(`/delete/${file}`, { method: "DELETE" }).then(loadImages);
+          };
+          li.appendChild(del);
+          list.appendChild(li);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
