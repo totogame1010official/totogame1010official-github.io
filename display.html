@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>画像表示</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body style="background-image: url('https://publicdomainq.net/images/201805/24s/publicdomainq-0022407oel.jpg'); background-size: cover; overflow: hidden;">
+  <img id="floating-img" src="" style="display:none; position:absolute; width:150px;" />
+  <script src="script.js"></script>
+  <script>
+    fetch("/latest").then(res => res.json()).then(data => {
+      const img = document.getElementById("floating-img");
+      img.src = data.url + "?" + new Date().getTime();
+      img.style.display = "block";
+      animateImage(img);
+    });
+  </script>
+</body>
+</html>
